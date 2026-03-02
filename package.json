@@ -1,19 +1,22 @@
 {
   "name": "buhoweb",
-  "version": "0.5.0",
-  "description": "[ES] Sistema de monitorización de sitios web - Prueba de Concepto / [EN] Web asset monitoring system - Proof of Concept (PoC) ",
+  "version": "1.0.0",
+  "description": "[ES] Sistema de monitorización de sitios web - Versión MMP (Producto Mínimo Comercializable) / [EN] Web asset monitoring system - MMP Version (Minimum Marketable Product)",
   "main": "src/app.js",
   "scripts": {
-    "inicio": "node src/app.js",
     "start": "node src/app.js"
   },
   "author": "José Alberto Moreno González",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.0",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
     "express": "^4.18.2",
     "helmet": "^7.1.0",
-    "sqlite3": "^5.1.6"
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^8.0.1",
+    "sqlite3": "^5.0.2"
   }
 }

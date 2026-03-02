@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<!--
+    ═══════════════════════════════════════════════════════════════════════════
+    BUHOWEB - v1.0.0 - MVP
+    ═══════════════════════════════════════════════════════════════════════════
+    
+    [ES] Panel de control principal para monitorización en tiempo real:
+         - Visualización de estado de sitios web (OK/KO)
+         - Gráficas de latencia de los últimos 150 registros
+         - Estadísticas de disponibilidad y latencia media
+         - Agregar/eliminar sitios web a monitorizar
+         - Cambio de contraseña de forma segura
+         - Descargar reportes en CSV
+    
+    [EN] Main control panel for real-time monitoring:
+         - Visualization of website status (OK/KO)
+         - Latency graphs of the last 150 records
+         - Statistics of availability and average latency
+         - Add/remove websites to monitor
+         - Secure password change
+         - Download reports in CSV
+    ═══════════════════════════════════════════════════════════════════════════
+-->
+<head>
+    <!-- [ES] Configuración del documento | [EN] Document configuration -->
+    <meta charset="UTF-8">
+    <title>BuhoWeb | Cuadro de Mandos</title>
+    <!-- [ES] Favicon con emoji de búho | [EN] Favicon with owl emoji -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>
+        🦉</text>
+    </svg>">
+    <!-- [ES] Framework CSS: Tailwind | [EN] CSS Framework: Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- [ES] Librería para gráficos: Chart.js | [EN] Charting library: Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- [ES] Script de autenticación | [EN] Authentication script -->
+    <script src="js/auth.js"></script>
+    <!-- [ES] Estilos personalizados | [EN] Custom styles -->
+    <style>
+        body { font-size: 0.9em; }
+        .gradiente { 
+            background: linear-gradient(to right, #60a5fa, #34d399); 
+            background-clip: text;
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-blue-500">
+
+
+    <!-- [ES] SECCIÓN: Navegación Superior | [EN] SECTION: Top Navigation -->
+    <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50">
+        <!-- [ES] Contenedor con máximo ancho | [EN] Container with max width -->
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- [ES] Logo de la aplicación con efecto gradient | [EN] Application logo with gradient effect -->
+            <h1 class="text-3xl font-black gradiente italic tracking-tightern">
+                BuhoWeb</h1>
+            <!-- [ES] Botones de la barra superior |  [EN] Top bar buttons -->
+            <div class="flex gap-4">
+                <!-- [ES] Botón para abrir panel de cambio de contraseña | [EN] Button to open password change panel -->
+                <button onclick="document.getElementById('panel-seguridad').classList.toggle('hidden')" class="text-[1em] font-black text-blue-400 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl">
+                    Cambiar contraseña
+                </button>
+                 <!-- [ES] Botón para cerrar sesión | [EN] Button to log out -->
+                <button onclick="Auth.logout()" class="text-[1em] font-black text-slate-400 border border-slate-800 px-4 py-2 rounded-xl hover:text-rose-500 transition-all">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </nav>
+
+
+         <!-- [ES] SECCIÓN: Panel de Cambio de Contraseña | [EN] SECTION: Password Change Panel -->
+    <div id="panel-seguridad" class="hidden bg-slate-900 border-b border-slate-800 p-6 shadow-2xl">
+        <div class="container mx-auto max-w-xl text-center">
+            <!-- [ES] Título del panel | [EN] Panel title -->
+            <h3 class="text-[1.2em] font-black text-blue-400 mb-4 tracking-widest">
+                Actualizar contraseña</h3>
+            <!-- [ES] Requisitos de seguridad | [EN] Security requirements -->
+            <p class="text-[1.2em] text-slate-500 mb-4 italic">
+                Debe contener 8 caracteres, y al menos una letra mayúscula, una letra minúscula y un número.</p>
+            <div class="flex flex-col gap-4">
+                <!-- [ES] Campo de entrada: Nueva contraseña | [EN] Input field: New password -->
+                <input id="nueva-clave" type="password" placeholder="Nueva contraseña segura" 
+                    class="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-1 ring-blue-500 text-sm text-white">
+                <div class="flex gap-4">
+                    <!-- [ES] Botón para guardar la nueva contraseña | [EN] Button to save new password -->
+                    <button onclick="guardarClave()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 px-6 py-3 rounded-xl font-black text-[1.2em] uppercase text-white shadow-lg transition-all">
+                        Confirmar Cambio
+                    </button>
+                    <!-- [ES] Botón para cerrar el panel | [EN] Button to close the panel -->
+                    <button onclick="toggleSeguridad()" class="text-slate-500 hover:text-white text-[1.2em] uppercase font-bold px-2">
+                        Volver atrás
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- [ES] SECCIÓN: Contenido Principal | [EN] SECTION: Main Content -->
+    <div class="container mx-auto px-6 py-10 max-w-4xl">
+        <!-- [ES] FORMULARIO: Añadir nuevo sitio a monitorizar | [EN] FORM: Add new site to monitor  -->
+        <div id="form-alta" class="bg-slate-900 p-8 rounded-[3rem] border border-slate-800 shadow-2xl mb-12">
+            <!-- [ES] Título del formulario | [EN] Form title -->
+            <h2 class="text-[1.2em] font-black text-blue-500 tracking-[0.2em] mb-4">
+                Añadir sitio web a monitorizar</h2>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <!-- [ES] Campo: Nombre/identificador del sitio | [EN] Field: Site name/identifier -->
+                <input id="nombre" type="text" placeholder="Identificador" class="flex-1 bg-slate-950 border border-slate-800 p-4 rounded-xl outline-none text-white shadow-inner">
+                <!-- [ES] Campo: URL del sitio (con dominio) | [EN] Field: Site URL (with domain) -->
+                <input id="url" type="text" placeholder="google.es" class="flex-1 bg-slate-950 border border-slate-800 p-4 rounded-xl outline-none font-mono text-blue-400 shadow-inner">
+                <!-- [ES] Botón para iniciar monitorización | [EN] Button to start monitorisation -->
+                <button onclick="añadir()" class="bg-blue-600 hover:bg-blue-500 px-10 py-4 rounded-3xl font-black text-s shadow-lg text-white active:scale-95 transition-all">
+                    Vigilar
+                </button>
+            </div>
+        </div>
+
+        <!-- [ES] REJILLA: Tarjeta del sitio web monitoreado | [EN] GRID: Card of monitored website  -->
+        <div id="grid" class="space-y-10"></div>
+    </div>
+
+    <!-- [ES] LÓGICA DE LA APLICACIÓN EN JAVASCRIPT / [EN] APPLICATION LOGIC IN JAVASCRIPT -->
+    <script>
+        // [ES] VERIFICACIÓN DE AUTENTICACIÓN | [EN] AUTHENTICATION VERIFICATION
+        // [ES] Si no hay sesión activa, redirigir a login | [EN] If no active session, redirect to login
+        if (!Auth.isLoggedIn()) window.location.href = 'index.html';
+        // [ES] Obtener el token para usarlo en peticiones autenticadas | [EN] Get token to use in authenticated requests
+        const token = Auth.getToken();
+
+        // [ES] FUNCIÓN: Refrescar la lista de sitios web (1 url) | [EN] FUNCTION: Refresh the list of websites (1 url)
+        /**
+         * [ES] Función principal que:
+         *      1. Obtiene la lista de activos del usuario
+         *      2. Oculta/muestra el formulario según hay activos o no
+         *      3. Para cada activo, obtiene estadísticas y crea una tarjeta
+         *      4. Carga la gráfica de latencia
+         * 
+         * [EN] Main function that:
+         *      1. Gets user's asset list
+         *      2. Hides/shows form based on whether there are assets
+         *      3. For each asset, gets statistics and creates a card
+         *      4. Loads latency graph
+         */
+        async function refrescar() {
+            // [ES] Obtener lista de activos (sitios web) | [EN] Get list of assets (websites)
+            const res = await fetch('/api/activos', { headers: { 'Authorization': token } });
+            const sitios = await res.json();
+            
+            // │ [ES] LÓGICA: Mostrar/ocultar formulario | [EN] LOGIC: Show/hide form  
+            const formAlta = document.getElementById('form-alta');
+            // [ES] Si hay sitios, ocultar el formulario; si no, mostrarlo | [EN] If there are sites, hide form; otherwise, show it
+            formAlta.style.display = sitios.length > 0 ? 'none' : 'block';
+            // [ES] Obtener el contenedor de la rejilla (grid) | [EN] Get the grid container
+            const grid = document.getElementById('grid');
+            // [ES] Limpiar la rejilla antes de agregar nuevo contenido | [EN] Clear grid before adding new content
+            grid.innerHTML = '';
+            // [ES] Recorrer cada sitio para crear sus tarjetas | [EN] Iterate through each site to create its cards
+            for (const s of sitios) {
+                // [ES] Obtener estadísticas (latencia media, uptime) | [EN] Get statistics (average latency, uptime)
+                const statRes = await fetch(`/api/estadisticas/${s.id}`, { headers: { 'Authorization': token } });
+                const stats = await statRes.json();
+                // [ES] Verificar si el sitio está operativo (estado OK) | [EN] Check if site is operational (OK status)
+                const esOK = s.ultimo_estado === 'OK';
+                
+                // │ [ES] CONSTRUCCIÓN: Tarjeta HTML del sitio │ [EN] BUILD: Site HTML card                              │
+                grid.innerHTML += `
+                    <div class="bg-slate-900/40 backdrop-blur-md rounded-[4rem] p-12 border border-slate-800 shadow-2xl hover:border-blue-500/40 transition-all duration-500">
+                        <!-- [ES] Encabezado con nombre del sitio y estado / [EN] Header with site name and status -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+                            <div>
+                                <!-- [ES] Nombre del sitio / [EN] Site name -->
+                                <h3 class="text-3xl font-black text-white uppercase tracking-tight">${s.nombre}</h3>
+                                <!-- [ES] URL del sitio / [EN] Site URL -->
+                                <p class="text-slate-500 text-xs font-mono mt-1">${s.url}</p>
+                            </div>
+                            <!-- [ES] Indicador de estado con color dinámico / [EN] Status indicator with dynamic color -->
+                            <span class="px-6 py-2 rounded-full text-xs font-black tracking-widest ${esOK?'text-emerald-400 bg-emerald-500/10':'text-rose-500 bg-rose-500/10'} border border-current/20 shadow-inner">● ${s.ultimo_estado}</span>
+                        </div>
+
+                        <!-- [ES] MÉTRICAS: Disponibilidad y latencia media / [EN] METRICS: Availability and average latency -->
+                        <div class="grid grid-cols-2 gap-6 mb-12 bg-slate-950/50 p-6 rounded-[2rem] border border-slate-800">
+                            <!-- [ES] Disponibilidad en porcentaje / [EN] Availability percentage -->
+                            <div class="text-center"><p class="text-[0.9em] uppercase text-slate-500 font-black mb-2">Disponibilidad</p><p class="text-2xl font-black text-emerald-400">${parseFloat(stats.uptime || 100).toFixed(2)}%</p></div>
+                            <!-- [ES] Latencia media en milisegundos / [EN] Average latency in milliseconds -->
+                            <div class="text-center border-l border-slate-800"><p class="text-[0.9em] uppercase text-slate-500 font-black mb-2">
+                                Latencia Media</p>
+                                <p class="text-2xl font-black text-blue-400">${Math.round(stats.media || 0)}ms</p></div>
+                        </div>
+
+                        <!-- [ES] GRÁFICA: Canvas para Chart.js / [EN] GRAPH: Canvas for Chart.js -->
+                        <div class="h-64 w-full mb-10"><canvas id="c-${s.id}"></canvas></div>
+                        
+                        <!-- [ES] ACCIONES: Botones para descargar reporte y eliminar / [EN] ACTIONS: Buttons to download report and delete -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-8 border-t border-slate-800/50">
+                            <!-- [ES] Enlace para descargar CSV / [EN] Link to download CSV -->
+                            <a href="/api/reporte/${s.id}?token=${token.replace('Bearer ', '')}" target="_blank" class="text-blue-500 text-xs font-black uppercase tracking-widest hover:text-blue-300 transition-all flex items-center gap-2"> 
+                                Descargar Informe CSV</a>
+                            <!-- [ES] Botón para eliminar el sitio / [EN] Button to remove the site -->
+                            <button onclick="eliminar(${s.id})" class="text-slate-600 hover:text-rose-500 text-xs font-black uppercase transition-all">
+                                Finalizar monitorización
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // [ES] Genera una demora de 200 milisegundos para asegurar que la gráfica está lista │ [EN] Generates a delay of 200 milliseconds to ensure the graph is ready.
+                await new Promise(r => setTimeout(r, 200));
+                // [ES] Cargar la gráfica del sitio específico │ [EN] Load the graph for the specific site
+                cargarGrafica(s.id);
+            }
+        }
+
+
+        // [ES] FUNCIÓN: Cargar gráfica de latencia con Chart.js │ [EN] FUNCTION: Load latency graph with Chart.js
+
+        /**
+         * [ES] Obtiene datos de latencia y dibuja una gráfica de línea
+         *      - Últimos 150 registros
+         *      - Línea azul con gradient de fondo
+         *      - Sin puntos ni etiquetas en X (es más limpio)
+         * 
+         * [EN] Gets latency data and draws a line graph
+         *      - Last 150 records
+         *      - Blue line with background gradient
+         *      - No points or X labels (cleaner)
+         */
+        async function cargarGrafica(id) {
+            // [ES] Obtener datos de latencia del servidor │ [EN] Get latency data from server
+            const res = await fetch(`/api/grafica/${id}`, { headers: { 'Authorization': token } });
+            const datos = await res.json();
+            // [ES] Obtener el elemento Canvas donde se dibujará la gráfica │ [EN] Get Canvas element where graph will be drawn
+            const ctx = document.getElementById(`c-${id}`).getContext('2d');
+            // [ES] Extraer solo los valores de latencia en un array │ [EN] Extract only latency values in an array
+            const v = datos.map(d => d.latencia);
+            // [ES] Si solo hay un data point, duplicarlo para que Chart.js dibuje algo │ [EN] If only one data point, duplicate it so Chart.js draws something
+            if(v.length < 2) v.push(v[0] || 0);
+            // [ES] Crear la gráfica con Chart.js │ [EN] Create the graph with Chart.js
+            new Chart(ctx, {
+                // [ES] Tipo de gráfica: línea  │ [EN] Chart type: line
+                type: 'line',
+                data: {
+                    // [ES] Etiquetas del eje X (vacías en este caso)  │ [EN] X-axis labels (empty in this case)
+                    labels: v.map(()=>''),
+                    datasets: [{
+                        // [ES] Datos a mostrar: latencias │ [EN] Data to show: latencies
+                        data: v,
+                        // [ES] Color de la línea: azul │ [EN] Line color: blue
+                        borderColor: '#3b82f6',
+                        // [ES] Grosor de la línea │ [EN] Line width
+                        borderWidth: 5,
+                        // [ES] No mostrar puntos en los datos │ [EN] Don't show points on data
+                        pointRadius: 0,
+                        // [ES] Suavidad de la curva │ [EN] Curve smoothness
+                        tension: 0.4,
+                        // [ES] Dibujar área bajo la línea (gradiente) │ [EN] Draw area under the line (gradient)
+                        fill: true,
+                        // [ES] Crear gradiente de fondo │ [EN] Create background gradient
+                        backgroundColor: (c) => {
+                            // [ES] Línea gradiente de azul opaco a azul transparente │ [EN] Gradient line from opaque blue to transparent blue
+                            const g = c.chart.ctx.createLinearGradient(0,0,0,200);
+                            g.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+                            g.addColorStop(1, 'rgba(59, 130, 246, 0)');
+                            return g;
+                        }
+                    }]
+                },
+                options: {
+                    // [ES] La gráfica se adapta al contenedor │ [EN] Graph adapts to container
+                    responsive: true,
+                    // [ES] Mantener el aspecto ratio │ [EN] Maintain aspect ratio
+                    maintainAspectRatio: false,
+                    plugins: {
+                        // [ES] Ocultar la leyenda (legend) │ [EN] Hide the legend
+                        legend: { display: false }
+                    },
+                    scales: {
+                        // [ES] Eje X: no mostrar │ [EN] X-axis: don't show
+                        x: { display: false },
+                        // [ES] Eje Y: no mostrar, mínimo 0 │ [EN] Y-axis: don't show, minimum 0
+                        y: { display: false, min: 0 }
+                    }
+                }
+            });
+        }
+
+        // [ES] FUNCIÓN: Añadir nuevo sitio web │ [EN] FUNCTION: Add new website
+        // [ES] Validar datos y enviar al servidor para agregar nuevo sitio │ [EN] Validate data and send to server to add new site
+        async function añadir() {
+            // [ES] Obtener valores del formulario  │ [EN] Get form values
+            const n = document.getElementById('nombre').value;
+            const u = document.getElementById('url').value;
+            // [ES] Validar que ambos campos tengan datos │ [EN] Validate that both fields have data
+            if(!n || !u) return alert("Faltan datos");
+            // [ES] Enviar petición POST al servidor │ [EN] Send POST request to server
+            await fetch('/api/activos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify({ nombre: n, url: u })
+            });
+            // [ES] Refrescar la lista para mostrar el nuevo sitio │ [EN] Refresh list to show new site
+            refrescar();
+        }
+
+
+        // [ES] FUNCIÓN: Eliminar sitio web │ [EN] FUNCTION: Delete website
+        // [ES] Pedir confirmación y eliminar el sitio del monitoreo │ [EN] Ask for confirmation and delete site from monitoring
+        async function eliminar(id) {
+            // [ES] Pedir confirmación al usuario │ [EN] Ask user for confirmation
+            if(confirm("¿Eliminar vigilancia?")) {
+                // [ES] Enviar petición DELETE al servidor │ [EN] Send DELETE request to server
+                await fetch(`/api/activos/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': token }
+                });
+                // [ES] Refrescar la lista  │ [EN] Refresh list
+                refrescar();
+            }
+        }
+       
+
+        // [ES] FUNCIÓN: Guardar nueva contraseña │ [EN] FUNCTION: Save new password
+        /**
+         * [ES] Validar fortaleza de contraseña y enviar al servidor
+         *      Requisitos:
+         *      - Mínimo 8 caracteres
+         *      - Al menos una mayúscula
+         *      - Al menos una minúscula
+         *      - Al menos un número
+         * 
+         * [EN] Validate password strength and send to server
+         *      Requirements:
+         *      - Minimum 8 characters
+         *      - At least one uppercase
+         *      - At least one lowercase
+         *      - At least one number
+         */
+        async function guardarClave() {
+            // [ES] Obtener la nueva contraseña del input │ [EN] Get new password from input
+            const nuevaClave = document.getElementById('nueva-clave').value;
+            // [ES] Expresión regular para validar requisitos │ [EN] Regular expression to validate requirements
+            const patron = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            // [ES] Validar que la contraseña cumple los requisitos │ [EN] Validate that password meets requirements
+            if (!patron.test(nuevaClave)) {
+                return alert("Seguridad insuficiente:\n- Mínimo 8 caracteres\n- Una mayúscula\n- Un número");
+            }
+
+            try {
+                // [ES] Enviar petición POST al servidor con la nueva contraseña │ [EN] Send POST request to server with new password
+                const res = await fetch('/api/usuario/cambiar-clave', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': Auth.getToken()  // [ES] Usar token de autenticación │ [EN]  Use authentication token
+                    },
+                    body: JSON.stringify({ nuevaClave })
+                });
+                // [ES] Verificar si la solicitud fue exitosa │ [EN] Check if request was successful
+                if (res.ok) {
+                    // [ES] Mostrar mensaje de éxito │ [EN] Show success message
+                    alert("Contraseña actualizada con éxito.");
+                    // [ES] Limpiar el campo de entrada │ [EN] Clear input field
+                    document.getElementById('nueva-clave').value = '';
+                    // [ES] Cerrar el panel automáticamente │ [EN] Close panel automatically
+                    toggleSeguridad();
+                } else {
+                    // [ES] Error del servidor │ [EN] Server error
+                    const errorData = await res.json();
+                    alert("Error: " + (errorData.error || "No se pudo actualizar."));
+                }
+            } catch (e) {
+                // [ES] Error de conexión │ [EN] Connection error
+                alert("Fallo en la comunicación con el servidor.");
+            }
+        }
+
+
+        // [ES] FUNCIÓN: Mostrar/Ocultar panel de seguridad │ [EN] FUNCTION: Show/Hide security panel
+        /**
+         * [ES] Alternar visibilidad del panel de cambio de contraseña, y también limpia el campo de entrada cuando se abre/cierra
+         * [EN] Toggle visibility of password change panel, and also clears input field when opened/closed
+         */
+        function toggleSeguridad() {
+            // [ES] Obtener el panel de seguridad │ [EN] Get security panel
+            const panel = document.getElementById('panel-seguridad');
+            // [ES] Alternar la clase hidden (mostrar/ocultar) │ [EN] Toggle hidden class (show/hide)
+            panel.classList.toggle('hidden');
+            // [ES] Limpiar el campo de texto │ [EN] Clear input field
+            document.getElementById('nueva-clave').value = '';
+        }
+
+
+        // [ES] INICIALIZACIÓN Y AUTO-ACTUALIZACIÓN │ [EN] INITIALIZATION AND AUTO-UPDATE
+        // [ES] Cargar los datos cuando se abre la página  │ [EN] Load data when page opens
+        refrescar();
+        
+        // [ES] Refrescar automáticamente cada 30 segundos (igual que el motor de vigilancia) │ [EN] Auto refresh every 30 seconds (same as monitoring engine)
+        setInterval(refrescar, 30000);
+    </script>
+</body>
+</html>

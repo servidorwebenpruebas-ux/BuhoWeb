@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  buho-web:
+    build: .
+    container_name: buhoweb_v1
+    ports:
+      - "3000:3000"
+    volumes:
+      # [ES] Vincular la carpeta 'data' local con la del contenedor - Esto evita que los usuarios y registros se borren al reiniciar
+      # [EN] Link the local 'data' folder with the container's - This prevents users and logs from being deleted upon restart
+      - ./data:/app/data
+    env_file:
+      - .env
+    restart: always
+    

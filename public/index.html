@@ -1,139 +1,326 @@
 <!DOCTYPE html>
 <html lang="es">
+<!--
+    ═══════════════════════════════════════════════════════════════════════════
+    BUHOWEB - v1.0.0 - MVP
+    ═══════════════════════════════════════════════════════════════════════════
+    
+    [ES] Pantalla principal para autenticación:
+         - Iniciar sesión (login) con correo y contraseña
+         - Crear nueva cuenta (registro) con validación de seguridad
+         - Verificar email con código de 4 dígitos
+         - Recuperar contraseña olvidada
+    
+    [EN] Main authentication screen:
+         - Log in with email and password
+         - Create new account with security validation
+         - Verify email with 4-digit code
+         - Recover forgotten password
+    ═══════════════════════════════════════════════════════════════════════════
+-->
 <head>
+    <!-- [ES] Configuración del documento │ [EN] Document configuration -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BuhoWeb | Cuadro de Mandos</title>
+    <title>BuhoWeb | Acceso</title>
+    
+    <!-- [ES] Favicon con emoji de búho │ [EN] Favicon with owl emoji -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>
+        🦉</text>
+    </svg>">
+    <!-- [ES] Framework de CSS: Tailwind CSS (estilos predefinidos) │ [EN] CSS Framework: Tailwind CSS (predefined styles) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- [ES] Script de autenticación (manejo de tokens) │ [EN] Authentication script (token handling) -->
+    <script src="js/auth.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
-
-    <!-- [ES]  BARRA DE NAVEGACIÓN -->
-    <!-- [EN]  NAVIGATION BAR -->
-    <nav class="border-b border-slate-800 p-5 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black text-xl shadow-lg">B</div>
-                <h1 class="text-xl font-black italic tracking-tighter uppercase">BuhoWeb <span class="text-blue-500 font-medium tracking-normal text-sm">MVP</span></h1>
-            </div>
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">Modo Abierto</span>
-        </div>
-    </nav>
-
-    <div class="container mx-auto px-6 py-10 max-w-5xl">
-        
-        <!-- [ES]  FORMULARIO DE ALTA DE SITIO WEB A MONITORIZAR-->
-        <!-- [EN]  FORM TO ADD A NEW WEBSITE TO MONITOR -->
-        <div class="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl mb-12">
-            <h2 class="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-4 text-center lg:text-left">Monitorizar nuevo sitio web</h2>
-            <div class="flex flex-col md:flex-row gap-4">
-                <input id="nombre" type="text" placeholder="Nombre (ej. Mi Web)" class="flex-1 bg-slate-950 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-1 ring-blue-500 text-sm transition-all">
-                <input id="url" type="text" placeholder="dominio.es" class="flex-1 bg-slate-950 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-1 ring-blue-500 text-sm font-mono transition-all">
-                <button onclick="añadir()" class="bg-blue-600 hover:bg-blue-500 px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95">Vigilar</button>
-            </div>
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-6 font-sans">
+    <!-- [ES] Contenedor principal centrado │ [EN] Main centered container -->
+    <div class="max-w-md w-full">
+        <!-- [ES] Encabezado con logo y versión │ [EN] Header with logo and version -->
+        <div class="text-center mb-10">
+            <!-- [ES] Título de la aplicación con gradient de color │ [EN] Application title with color gradient -->
+            <h1 class="text-6xl font-black bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent italic tracking-tighter">
+                BuhoWeb</h1>
+            <!-- [ES] Versión de la aplicación │ [EN] Application version -->
+            <p class="text-slate-500 mt-2 tracking-widest text-[1.5em] font-bold italic">
+                v1.0.0 - MMP</p>
         </div>
 
-        <!-- [ES] REJILLA DE SITIOS -->
-        <!-- [EN] ASSETS GRID -->
-        <div id="grid-sitios" class="grid grid-cols-1 md:grid-cols-2 gap-8 text-white">
-            <!-- [ES] Carga de fomra dinámica con JavaScript -->
-            <!-- [EN]  Dynamically loaded with JavaScript -->
+        <!-- [ES] Tarjeta principal  │ [EN] Main card  -->
+        <div class="bg-slate-900/50 backdrop-blur-xl p-8 rounded-[2rem] border border-slate-800 shadow-2xl">
+            
+            <!-- [ES] UI PRINCIPAL: Formulario de Login/Registro │  [EN] MAIN UI: Login/Registration form -->
+            <div id="ui-principal">
+                <!-- [ES] Título que cambia según el modo (Login o Registro)  │ [EN] Title that changes based on mode (Login or Registration) -->
+                <h2 id="titulo-form" class="text-xl md:text-2xl lg:text-2xl font-bold mb-4 text-center text-blue-400">
+                    Identificarse
+                </h2>                
+                <div class="space-y-5">
+                    <!-- [ES] Campo de entrada: Correo electrónico  │ [EN] Input field: Email -->
+                    <input id="correo" type="email" placeholder="Correo electrónico" class="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500 text-sm text-white">
+                    
+                    <!-- [ES] Campo de entrada: Contraseña  │ [EN] Input field: Password -->
+                    <input id="clave" type="password" placeholder="Contraseña" class="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500 text-sm text-white">
+                    
+                    <!-- [ES] Botón principal: Enviar formulario  │ [EN] Main button: Submit form -->
+                    <button onclick="procesar()" id="btn-accion" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg active:scale-95 text-sm uppercase">
+                        Entrar
+                    </button>
+                    <!-- [ES] Enlaces secundarios: Registro y Recuperación  │ [EN] Secondary links: Registration and Recovery -->
+                    <div class="flex flex-col gap-4 text-center text-[1em] text-slate-500 mt-6 font-bold uppercase">
+                        <!-- [ES] Botón para cambiar a pantalla de registro  │ [EN] Button to switch to registration screen -->
+                        <button onclick="cambiarModo('registro')" id="btn-toggle" class="hover:text-blue-400 underline">
+                            Crear nueva cuenta
+                        </button>
+                        <!-- [ES] Botón para cambiar a pantalla de recuperación de contraseña  │ [EN] Button to switch to password recovery screen -->
+                        <button onclick="cambiarModo('recuperar')" class="hover:text-rose-400">
+                            Recuperar contraseña
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- [ES] UI CONFIRMACIÓN: Formulario para verificar email con código  │ [EN] CONFIRMATION UI: Form to verify email with code -->
+            <div id="ui-confirmar" class="hidden text-center">
+                <!-- [ES] Título de la pantalla  │ [EN] Screen title -->
+                <h2 class="text-xl font-bold mb-4 text-emerald-400">
+                    Verificar cuenta</h2>
+                <!-- [ES] Instrucción para el usuario  │ [EN] Instructions for user -->
+                <p class="text-slate-400 text-xs mb-8 italic italic">
+                    Introduzca el código de activación enviado a su correo electrónico</p>
+                <!-- [ES] Campo de entrada: Código de verificación de 4 dígitos  │ [EN] Input field: 4-digit verification code -->
+                <input id="codigo-verif" type="text" maxlength="4" placeholder="0000" class="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl outline-none text-center font-black tracking-[1em] mb-6 text-emerald-400 text-2xl shadow-inner">
+                <!-- [ES] Botón para validar el código  │ [EN] Button to validate code -->
+                <button onclick="validarCodigo()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg active:scale-95">
+                    Validar ahora
+                </button>
+                <!-- [ES] Botón para cancelar y volver atrás  │ [EN] Button to cancel and go back -->
+                <button onclick="abortarRegistro()" class="text-slate-500 text-[1em] font-bold hover:text-white uppercase tracking-widest mt-6 block w-full text-center">
+                    ← Cancelar y volver
+                </button>  
+            </div>
+
+            <!-- [ES] UI RECUPERACIÓN: Formulario para recuperar contraseña  │ [EN] RECOVERY UI: Form to recover password -->
+            <div id="ui-recuperar" class="hidden text-center">
+                <!-- [ES] Título de la pantalla  │ [EN] Screen title -->
+                <h2 class="text-xl font-bold mb-4 text-blue-400">
+                    Recuperar acceso</h2>
+                <!-- [ES] Campo de entrada: Email registrado  │ [EN] Input field: Registered email -->
+                <input id="correo-recuperar" type="email" placeholder="Su email registrado" class="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500 mb-6 text-sm text-white">
+                <!-- [ES] Botón para solicitar recuperación  │ [EN] Button to request recovery -->
+                <button onclick="solicitarRecuperacion()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-bold text-xs uppercase mb-4 shadow-lg active:scale-95">
+                    Enviar instrucciones
+                </button>
+                <!-- [ES] Botón para volver al login  │ [EN] Button to return to login -->
+                <button onclick="cambiarModo('login')" class="text-slate-500 text-[1em] font-bold hover:text-white underline uppercase">
+                    Volver atrás
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- [ES] LÓGICA DE LA APLICACIÓN EN JAVASCRIPT  │ [EN] APPLICATION LOGIC IN JAVASCRIPT -->
     <script>
-        async function refrescarPanel() {
-            const res = await fetch('/api/activos');
-            const sitios = await res.json();
-            const grid = document.getElementById('grid-sitios');
-            grid.innerHTML = '';
+        // [ES] VARIABLES GLOBALES │ [EN] GLOBAL VARIABLES
+        // [ES] Guardar el modo actual (login, registro, confirmar, recuperar) │ [EN] Store current mode (login, registration, confirm, recovery)
+        let modoActual = "login";
+        // [ES] Guardar el correo temporal mientras se completa el registro │ [EN] Store temporary email while registration is completed
+        let correoTemporal = "";
 
-            sitios.forEach(s => {
-                const esOK = s.ultimo_estado === 'OK';
-                grid.innerHTML += `
-                    <div class="bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-8 border border-slate-800 shadow-2xl hover:border-blue-500/40 transition-all duration-500">
-                        <div class="flex justify-between items-start mb-8">
-                            <div>
-                                <h3 class="text-xl font-bold uppercase tracking-tight">${s.nombre}</h3>
-                                <p class="text-slate-500 text-[10px] font-mono mt-1">${s.url}</p>
-                            </div>
-                            <span class="px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${esOK ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-500 bg-rose-500/10'} border border-current/20">
-                                ${s.ultimo_estado}
-                            </span>
-                        </div>
-                        
-                        <!-- [ES]  ÁREA DE GRÁFICA -->
-                        <!-- [EN]  GRAPH AREA -->
-                        <div class="h-32 w-full">
-                            <canvas id="grafica-${s.id}"></canvas>
-                        </div>
-                        
-                        <div class="flex justify-end mt-8 pt-4 border-t border-slate-800/50">
-                            <button onclick="eliminar(${s.id})" class="text-slate-600 hover:text-rose-500 text-[9px] font-black uppercase tracking-widest transition-colors">Dejar de vigilar</button>
-                        </div>
-                    </div>
-                `;
-                setTimeout(() => cargarDatosGrafica(s.id), 200);
-            });
-        }
 
-        async function cargarDatosGrafica(id) {
-            const res = await fetch(`/api/grafica/${id}`);
-            const datos = await res.json();
-            const ctx = document.getElementById(`grafica-${id}`).getContext('2d');
-            const valores = datos.map(d => d.latencia);
+        // [ES] FUNCIÓN: Cambiar entre diferentes pantallas │ [EN] FUNCTION: Switch between different screens
+        /**
+         * [ES] Cambia el modo de la UI y actualiza el título y botones
+         *      - login: Pantalla para iniciar sesión
+         *      - registro: Pantalla para crear cuenta nueva
+         *      - confirmar: Pantalla para verificar email
+         *      - recuperar: Pantalla para recuperar contraseña
+         * 
+         * [EN] Changes UI mode and updates title and buttons
+         *      - login: Screen to log in
+         *      - registro: Screen to create new account
+         *      - confirmar: Screen to verify email
+         *      - recuperar: Screen to recover password
+         */
+        function cambiarModo(modo) {
+            // [ES] Actualizar el modo actual │ [EN] Update current mode
+            modoActual = modo;
             
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: valores.map(() => ''),
-                    datasets: [{
-                        data: valores,
-                        borderColor: '#3b82f6', // [ES] La línea azul de la Gráfica | [EN] The blue line of the Graph
-                        borderWidth: 4,
-                        pointRadius: 0,
-                        tension: 0.45,
-                        fill: true,
-                        backgroundColor: (c) => {
-                            const g = c.chart.ctx.createLinearGradient(0, 0, 0, 150);
-                            g.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
-                            g.addColorStop(1, 'rgba(59, 130, 246, 0)');
-                            return g;
-                        }
-                    }]
-                },
-                options: { 
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { display: false }, y: { display: false, min: 0 } }
+            // [ES] Ocultar todos los elementos de UI │ [EN] Hide all UI elements
+            document.querySelectorAll('[id^="ui-"]').forEach(el => el.classList.add('hidden'));
+            
+            // [ES] Si el modo es login o registro, mostrar la UI principal y actualizar textos │ [EN] If mode is login or registration, show main UI and update texts
+            if (modo === 'login' || modo === 'registro') {
+                document.getElementById('ui-principal').classList.remove('hidden');
+                const titulo = document.getElementById('titulo-form');
+                const btnAccion = document.getElementById('btn-accion');
+                const btnToggle = document.getElementById('btn-toggle');
+                
+                if (modo === 'login') {
+                    // [ES] Modo LOGIN: Cambiar etiquetas │ [EN] LOGIN mode: Change labels
+                    titulo.innerText = "Identificarse";
+                    btnAccion.innerText = "Entrar";
+                    btnToggle.innerText = "Crear nueva cuenta";
+                    btnToggle.onclick = () => cambiarModo('registro');
+                } else {
+                    // [ES] Modo REGISTRO: Cambiar etiquetas │ [EN] REGISTRATION mode: Change labels
+                    titulo.innerText = "Nueva Cuenta";
+                    btnAccion.innerText = "Registrarse";
+                    btnToggle.innerText = "Ya tengo cuenta - Entrar";
+                    btnToggle.onclick = () => cambiarModo('login');
                 }
-            });
-        }
-
-        async function añadir() {
-            const nombre = document.getElementById('nombre').value;
-            const url = document.getElementById('url').value;
-            if(!nombre || !url) return alert("Rellene los campos.");
-            await fetch('/api/activos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, url })
-            });
-            document.getElementById('nombre').value = '';
-            document.getElementById('url').value = '';
-            refrescarPanel();
-        }
-
-        async function eliminar(id) {
-            if(confirm("¿Eliminar vigilancia?")) {
-                await fetch(`/api/activos/${id}`, { method: 'DELETE' });
-                refrescarPanel();
+            } else {
+                // [ES] Para otros modos (confirmar, recuperar), mostrar la UI específica │ [EN] For other modes (confirm, recovery), show specific UI
+                document.getElementById('ui-' + modo).classList.remove('hidden');
             }
         }
 
-        refrescarPanel();
-        setInterval(refrescarPanel, 40000);
+
+        // [ES] FUNCIÓN: Cancelar registro si no se verifica el email │ [EN] FUNCTION: Cancel registration if email is not verified
+
+        /**
+         * [ES] Elimina el usuario de la base de datos si cancela el registro
+         *      Sin verificar. Se llama si el usuario da atras en la pantalla
+         *      de confirmación
+         * 
+         * [EN] Deletes user from database if registration is cancelled
+         *      without verification. Called if user goes back on
+         *      confirmation screen
+         */
+        async function abortarRegistro() {
+            // [ES] Si no hay correo temporal, no hay usuario para eliminar │ [EN] If no temporary email, no user to delete
+            if (!correoTemporal) return location.reload();
+            
+            // [ES] Enviar petición DELETE al servidor para borrar el usuario │ [EN] Send DELETE request to server to delete user
+            await fetch('/api/acceso/abortar', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo: correoTemporal })
+            });
+            
+            // [ES] Recargar la página para limpiar y volver al inicio │ [EN] Reload page to clean and return to start
+            location.reload();
+        }
+
+
+        // [ES] FUNCIÓN: Procesar LOGIN o REGISTRO │ [EN] FUNCTION: Process LOGIN or REGISTRATION
+
+        /**
+         * [ES] Función principal que maneja tanto LOGIN como REGISTRO
+         *      Valida fortaleza de contraseña en modo registro
+         *      Envía datos al servidor y maneja respuestas
+         * 
+         * [EN] Main function that handles both LOGIN and REGISTRATION
+         *      Validates password strength in registration mode
+         *      Sends data to server and handles responses
+         */
+        async function procesar() {
+            // [ES] Obtener valores de los campos de entrada │ [EN] Get values from input fields
+            const correo = document.getElementById('correo').value;
+            const clave = document.getElementById('clave').value;
+            
+            // [ES] Validar que los campos no estén vacíos │ [EN] Validate that fields are not empty
+            if(!correo || !clave) return alert("Complete los datos solicitados.");
+
+
+            // [ES] VALIDACIÓN DE FORTALEZA (Solo en registro) │ [EN] STRENGTH VALIDATION (Only in registration) 
+            if (modoActual === "registro") {
+                // [ES] Validar que la contraseña cumple requisitos de seguridad: Mínimo 8 caracteres, al menos una letra mayúscula, al menos una minúscula, y al menos un número
+                // [EN] Validate password meets security requirements: Minimum 8 characters, at least one uppercase, at least one lowercase and at least one number
+                const patronClave = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+                if (!patronClave.test(clave)) {
+                    return alert("Seguridad insuficiente: La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.");
+                }
+            }
+            // [ES] Elegir el endpoint según el modo │ [EN] Choose endpoint based on mode
+            const endpoint = (modoActual === "login") ? '/api/acceso/login' : '/api/acceso/registro';
+            
+            try {
+                // [ES] Enviar petición POST al servidor │ [EN] Send POST request to server
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ correo, clave })
+                });
+                // [ES] Parsear respuesta JSON del servidor │ [EN] Parse JSON response from server
+                const data = await res.json();
+                // [ES] Verificar si la petición fue exitosa │ [EN] Check if request was successful
+                if (res.ok) {
+                    if (modoActual === "login") {
+                        // [ES] LOGIN exitoso: Guardar token y redirigir al dashboard │ [EN] Successful LOGIN: Save token and redirect to dashboard
+                        Auth.saveSession(data.token);
+                        window.location.href = 'cuadro-mandos.html';
+                    }
+                    else {
+                        // [ES] REGISTRO exitoso: Guardar correo y cambiar a pantalla de verificación │ [EN] Successful REGISTRATION: Save email and change to verification screen
+                        correoTemporal = correo;
+                        cambiarModo('confirmar');
+                        alert("Código enviado.");
+                    }
+                } else {
+                    // [ES] Error del servidor: Mostrar mensaje de error │ [EN] Server error: Show error message
+                    alert(data.error);
+                }
+            } catch (e) {
+                // [ES] Error de red o conexión │ [EN] Network or connection error
+                alert("Error de red. ¿Está Node.js activo?");
+            }
+        }
+
+
+        // [ES] FUNCIÓN: Validar código de verificación │ [EN] FUNCTION: Validate verification code
+
+        /**
+         * [ES] Envía el código de 4 dígitos para verificar el email: si es correcto, la cuenta se activa; si es incorrecto repetidas veces, la cuenta se elimina
+         * [EN] Sends 4-digit code to verify email: If it's correct, the account is activated; if it's incorrect multiple times, the account is deleted
+         */
+        async function validarCodigo() {
+            // [ES] Obtener código del input │ [EN] Get code from input
+            const codigo = document.getElementById('codigo-verif').value;
+            // [ES] Enviar código al servidor │ [EN] Send code to server
+            const res = await fetch('/api/acceso/verificar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo: correoTemporal, codigo })
+            });
+            // [ES] Procesar respuesta │ [EN] Process response
+            const data = await res.json();
+            if (res.ok) {
+                // [ES] Verificación exitosa │ [EN] Successful verification
+                alert("Cuenta verificada con éxito. Ya puede identificarse.");
+                // [ES] Recargar página para volver a login │ [EN] Reload page to return to login
+                location.reload();
+            } else {
+                // [ES] Error en la verificación │ [EN] Verification error
+                alert(data.error);
+                // [ES] Si el usuario fue borrado tras 3 intentos, reiniciar la página │ [EN] If user was deleted after 3 attempts, restart page
+                if (data.error.includes("borrado")) {
+                    location.reload(); 
+                }
+            }
+        }
+
+
+        // [ES] FUNCIÓN: Solicitar recuperación de contraseña │ [EN] FUNCTION: Request password recovery
+
+        /**
+         * [ES] Envía solicitud para obtener contraseña temporal por email. El servidor genera una nueva contraseña y la envía
+         * [EN] Sends request to get temporary password by email. Server generates new password and sends it
+         */
+        async function solicitarRecuperacion() {
+            // [ES] Obtener correo del input │ [EN] Get email from input
+            const correo = document.getElementById('correo-recuperar').value;
+            // [ES] Enviar solicitud al servidor │ [EN] Send request to server
+            await fetch('/api/acceso/recuperar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo })
+            });
+            // [ES] Mostrar mensaje de confirmación │ [EN] Show confirmation message
+            alert("Operación completada. Revise su bandeja.");
+            // [ES] Volver a la pantalla de login │ [EN] Return to login screen
+            cambiarModo('login');
+        }
     </script>
 </body>
 </html>
